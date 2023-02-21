@@ -27,11 +27,16 @@ usersRoute.use(session({
 passport.use('github', new GithubStrategy({
     clientID: 'Iv1.f78e739f656b41b4',
     clientSecret: '60bac531f1602a5f0fc9d22acc84d09533ccf237',
-    callbackURL: 'https://prueba-de-login-production.up.railway.app/users/callback'
+    callbackURL: 'http://localhost:8080/users/callback'
 }, async (accessToken, refreshToken, profile, done) => {
-    console.log(profile);
-    const userLogued = await archivo.createUser({ email: profile['_json']['email'], password: '' });
-    return done(null, userLogued, { status: 200, email: profile['_json']['email'] });
+    const userCheck = await archivo.readUser(profile['_json']);
+    if (!userCheck) {
+        const userLogued = await archivo.createUser({ email: profile['_json']['email'], password: '' });
+        return done(null, userLogued, { status: 200, email: profile['_json']['email'] });
+    } else {
+        return done(null, userCheck, { status: 400, message:'Usuario ya existe en la base de datos'});
+    }
+
 }));
 
 usersRoute.use(passport.initialize());
@@ -48,7 +53,7 @@ passport.deserializeUser(async (id, done) => {
 
 usersRoute.get('/github', passport.authenticate('github'));
 usersRoute.get('/callback', passport.authenticate('github', { failureRedirect: '/auth/login', failureMessage:'Error' }), (req, res) => {
-    req.session.user = { email: req.body.email };
+    req.session.user = { email: req.user.email };
     res.redirect('/home');
 });
 
