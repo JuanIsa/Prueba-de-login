@@ -27,7 +27,7 @@ usersRoute.use(session({
 passport.use('github', new GithubStrategy({
     clientID: 'Iv1.f78e739f656b41b4',
     clientSecret: '60bac531f1602a5f0fc9d22acc84d09533ccf237',
-    callbackURL: 'http://localhost:8080/users/callback'
+    callbackURL: 'https://prueba-de-login-production.up.railway.app/users/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     console.log(profile);
     const userLogued = await archivo.createUser({ email: profile['_json']['email'], password: '' });
