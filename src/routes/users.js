@@ -30,13 +30,13 @@ passport.use('github', new GithubStrategy({
     callbackURL: 'http://localhost:8080/users/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     const userCheck = await archivo.readUser(profile['_json']);
-    if (!userCheck) {
-        const userLogued = await archivo.createUser({ email: profile['_json']['email'], password: '' });
+    let userLogued={};        
+    if (userCheck === null) {
+        userLogued= await archivo.createUser({ email: profile['_json']['email'], password: '' });
         return done(null, userLogued, { status: 200, email: profile['_json']['email'] });
     } else {
-        return done(null, userCheck, { status: 400, message:'Usuario ya existe en la base de datos'});
+        return done(null, userCheck, { status: 200, email: profile['_json']['email'] });
     }
-
 }));
 
 usersRoute.use(passport.initialize());
